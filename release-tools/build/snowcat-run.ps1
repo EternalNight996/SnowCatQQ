@@ -122,6 +122,31 @@ if (-not (Test-Path (Join-Path $staticDir 'index.html'))) {
     Write-Ok 'static/ 已存在'
 }
 
+
+# ── 5b. 运行时依赖（napcat.mjs 把 express / ws 打成 external）
+$depManifest = Join-Path $Build 'package.json'
+$depTarget = Join-Path $Shell 'package.json'
+$hasExpress = Test-Path (Join-Path $Shell 'node_modules\express\package.json')
+$hasWs = Test-Path (Join-Path $Shell 'node_modules\ws\package.json')
+if ($hasExpress -and $hasWs) {
+    Write-Ok '运行时依赖已存在（express + ws）'
+} else {
+    if (Test-Path $depManifest) { Copy-Item $depManifest $depTarget -Force }
+    if (-not (Test-Path $depTarget)) { throw '缺少运行时依赖清单: ' + $depTarget }
+    $npmCmd = Get-Command npm -ErrorAction SilentlyContinue
+    if (-not $npmCmd) { throw '未找到 npm：napcat.mjs 依赖 express / ws，请先安装 Node.js 18+' }
+    Write-Step '安装运行时依赖（express / ws）…'
+    Push-Location $Shell
+    try {
+        & $npmCmd.Source install --omit=dev --no-audit --no-fund
+        if ($LASTEXITCODE -ne 0) { throw ('npm install 失败，退出码 ' + $LASTEXITCODE) }
+    } finally { Pop-Location }
+    $hasExpress = Test-Path (Join-Path $Shell 'node_modules\express\package.json')
+    $hasWs = Test-Path (Join-Path $Shell 'node_modules\ws\package.json')
+    if (-not ($hasExpress -and $hasWs)) { throw '安装后仍找不到 express / ws' }
+    Write-Ok '运行时依赖就位'
+}
+
 # ── 6. 启动 ──────────────────────────────────────────────────
 Stop-Qq
 foreach ($n in 'https_proxy','HTTPS_PROXY','http_proxy','HTTP_PROXY') {

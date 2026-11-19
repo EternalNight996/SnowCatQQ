@@ -28,6 +28,8 @@ SnowCat 是一个由社区开发者维护的第三方 QQ 客户端：让开发�
 # 3. WebUI 就绪 → http://127.0.0.1:6099/webui/
 ```
 
+> 首次启动会自动补齐运行时依赖（express / ws）：napcat.mjs 把它们打成 external，缺失时注入成功但会在日志里看到 Cannot find module: express。该步骤需要本机已安装 Node.js 18+ 与 npm。
+
 ## 文档
 
 | 文档 | 内容 |

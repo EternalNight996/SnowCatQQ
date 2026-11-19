@@ -1,0 +1,11 @@
+{
+  "name": "snowcat-shell-runtime",
+  "private": true,
+  "version": "0.0.1",
+  "description": "napcat.mjs 中被打成 external 的运行时依赖；本地启动时由 snowcat-run.ps1 安装",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.0.0",
+    "ws": "^8.18.3"
+  }
+}
